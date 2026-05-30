@@ -1,5 +1,8 @@
 import numpy as np
-import keyboard as kb
+from bodeis import Body
+import physics
+
+dt=1
 
 def update(frame):
 
@@ -30,7 +33,6 @@ def update(frame):
         moon_trail
     )
 
-G = 1
 
 earth_x = []
 earth_y = []
@@ -38,51 +40,38 @@ earth_y = []
 moon_x = []
 moon_y = []
 
-earth = np.array([100.0,50.0])
-moon = np.array([250.0,70.0])
+earth = Body(
+    "earth",
+    100,
+    (100,50),
+    (0.0428,-0.3212),
+    10
+)
 
-me = 100
-mm = 40
-re=7
-rm=4
+moon = Body(
+    "moon",
+    40,
+    (250,70),
+    (-0.107,0.803),
+    5
+)
+
+bodies=[earth,moon]
 
 time=0
 
-dt = 1
-
-vel_e = np.array([0.0428,-0.3212])
-vel_m = np.array([-0.107,0.803])
 
 for i in range(5000):
-    r = moon - earth
-    dist = np.linalg.norm(r)
-    ur = r/dist
-    time+=1
-    if dist<=(re+rm):
-        print(time)
-        print(f"collsion at {dist}")      
-        break
+
+    dist=physics.update(earth,moon,dt)
 
 
-    Fg = (G*me*mm)/(dist**2)
+ 
+    earth_x.append(earth.pos[0])
+    earth_y.append(earth.pos[1])
 
-    F_vect = Fg * ur
-
-    acc_e = F_vect/me
-    acc_m = -F_vect/mm
-
-    vel_e += acc_e*dt
-    vel_m+= acc_m*dt
-
-    earth_x.append(earth[0])
-    earth_y.append(earth[1])
-
-    moon_x.append(moon[0])
-    moon_y.append(moon[1])
-    
-    
-    earth += vel_e*dt
-    moon += vel_m*dt
+    moon_x.append(moon.pos[0])
+    moon_y.append(moon.pos[1])
 
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
