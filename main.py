@@ -1,115 +1,37 @@
-import numpy as np
-from bodeis import Body
+import math
 import physics
+import save as savemod
+from bodeis import Body
+from simulation import run_simulation
+from animation import animate
 
-dt=1
+# AU, solar masses, years — G = 4π² in these units
+# v = sqrt(G * M_sun / r) = sqrt(4π² / r) for each planet
 
-def update(frame):
+G  = 4 * math.pi**2
+dt = 0.0001
+steps = 100000
 
-    earth_dot.set_data(
-        [earth.xhist[frame]],
-        [earth.yhist[frame]]
-    )
+sun     = Body("sun",     1.0,       (0.000, 0),  (0,  0.000),   0.00465 )
+mercury = Body("mercury", 1.651e-7,  (0.387, 0),  (0,  10.1001), 0.000016)
+venus   = Body("venus",   2.447e-6,  (0.723, 0),  (0,  7.3894),  0.000040)
+earth   = Body("earth",   3.003e-6,  (1.000, 0),  (0,  6.2832),  0.000043)
+mars    = Body("mars",    3.213e-7,  (1.524, 0),  (0,  5.0896),  0.000023)
+jupiter = Body("jupiter", 9.545e-4,  (5.203, 0),  (0,  2.7546),  0.000477)
+saturn  = Body("saturn",  2.858e-4,  (9.537, 0),  (0,  2.0346),  0.000403)
+uranus  = Body("uranus",  4.366e-5,  (19.19, 0),  (0,  1.4343),  0.000171)
+neptune = Body("neptune", 5.151e-5,  (30.07, 0),  (0,  1.1458),  0.000165)
 
-    moon_dot.set_data(
-        [moon.xhist[frame]],
-        [moon.yhist[frame]]
-    )
+bodies = [sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune]
 
-    earth_trail.set_data(
-        earth.xhist[:frame],
-        earth.yhist[:frame]
-    )
+# zero total momentum — prevents sun drift from Jupiter's pull
+total_momentum = sum(b.mass * b.vel for b in bodies)
+sun.vel -= total_momentum / sun.mass
 
-    moon_trail.set_data(
-        moon.xhist[:frame],
-        moon.yhist[:frame]
-    )
+run_simulation(bodies, steps=50000, dt=0.0001)
 
-    mars_dot.set_data(
-    [mars.xhist[frame]],
-    [mars.yhist[frame]]
-    )
-    mars_trail.set_data(
-        mars.xhist[:frame],
-        mars.yhist[:frame]
-    )
-    return (
-        earth_dot,
-        moon_dot,
-        earth_trail,
-        moon_trail,
-        mars_dot,
-        mars_trail
+def on_key(event, bodies):
+    if event.key == 's':
+        savemod.save(bodies)
 
-    )
-earth = Body(
-    "earth",
-    1000,        # much heavier — needs to dominate gravitationally
-    (0, 0),
-    (0, 0),      # stationary at center
-    10
-)
-
-moon = Body(
-    "moon",
-    1,           # negligible mass relative to earth
-    (100, 0),
-    (0, 3.162),  # sqrt(1000 / 100) ≈ 3.162
-    5
-)
-
-mars = Body(
-    "mars",
-    1,           # also negligible
-    (180, 0),
-    (0, 2.357),  # sqrt(1000 / 180) ≈ 2.357
-    4
-)
-
-bodies=[earth,moon,mars]
-
-time=0
-
-
-for i in range(5000):
-
-    print(i)
-
-    dist=physics.update_nbody(bodies,dt)
-
-    for body in bodies:
-         body.xhist.append(body.pos[0])
-         body.yhist.append(body.pos[1])
-
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
-
-fig, ax = plt.subplots()
-
-ax.set_aspect('equal')
-
-all_x = [x for body in bodies for x in body.xhist]
-all_y = [y for body in bodies for y in body.yhist]
-
-padding = 20
-ax.set_xlim(min(all_x) - padding, max(all_x) + padding)
-ax.set_ylim(min(all_y) - padding, max(all_y) + padding)
-
-earth_dot, = ax.plot([], [], 'bo', markersize=8)
-moon_dot, = ax.plot([], [], 'ro', markersize=5)
-mars_dot, = ax.plot([], [], 'go', markersize=5)
-
-
-earth_trail, = ax.plot([], [], 'b-', alpha=0.5)
-moon_trail, = ax.plot([], [], 'r-', alpha=0.5)
-mars_trail, = ax.plot([], [], 'g-', alpha=0.5)
-ani = FuncAnimation(
-    fig,
-    update,
-    frames=len(earth.xhist),
-    interval=10,
-    blit=True
-)
-
-plt.show()
+animate(bodies, on_key=on_key)
