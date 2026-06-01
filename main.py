@@ -45,25 +45,25 @@ def update(frame):
     )
 earth = Body(
     "earth",
-    100,
-    (0,0),
-    (0,0),
+    1000,        # much heavier — needs to dominate gravitationally
+    (0, 0),
+    (0, 0),      # stationary at center
     10
 )
 
 moon = Body(
     "moon",
-    20,
-    (100,0),
-    (0,1.0),
+    1,           # negligible mass relative to earth
+    (100, 0),
+    (0, 3.162),  # sqrt(1000 / 100) ≈ 3.162
     5
 )
 
 mars = Body(
     "mars",
-    10,
-    (180,0),
-    (0,0.75),
+    1,           # also negligible
+    (180, 0),
+    (0, 2.357),  # sqrt(1000 / 180) ≈ 2.357
     4
 )
 
@@ -89,15 +89,12 @@ fig, ax = plt.subplots()
 
 ax.set_aspect('equal')
 
-ax.set_xlim(
-    min(min(earth.xhist), min(moon.xhist)) - 20,
-    max(max(earth.xhist), max(moon.xhist)) + 20
-)
+all_x = [x for body in bodies for x in body.xhist]
+all_y = [y for body in bodies for y in body.yhist]
 
-ax.set_ylim(
-    min(min(earth.yhist), min(moon.yhist)) - 20,
-    max(max(earth.yhist), max(moon.yhist)) + 20
-)
+padding = 20
+ax.set_xlim(min(all_x) - padding, max(all_x) + padding)
+ax.set_ylim(min(all_y) - padding, max(all_y) + padding)
 
 earth_dot, = ax.plot([], [], 'bo', markersize=8)
 moon_dot, = ax.plot([], [], 'ro', markersize=5)
@@ -106,7 +103,7 @@ mars_dot, = ax.plot([], [], 'go', markersize=5)
 
 earth_trail, = ax.plot([], [], 'b-', alpha=0.5)
 moon_trail, = ax.plot([], [], 'r-', alpha=0.5)
-mars_trail, = ax.plot([], [], 'r-', alpha=0.5)
+mars_trail, = ax.plot([], [], 'g-', alpha=0.5)
 ani = FuncAnimation(
     fig,
     update,

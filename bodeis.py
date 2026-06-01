@@ -11,7 +11,7 @@ class Body:
         self.vel = np.array(vel, dtype=float)
         self.xhist=[]
         self.yhist=[]
-        self.acc=np.array[0.0,0.0]
+        self.acc=np.array([0.0,0.0])
 
         self.rad = rad
 
