@@ -47,19 +47,25 @@ earth = Body(
     "earth",
     100,
     (0,0),
-    (0.0428,-0.3212),
+    (0,0),
     10
 )
 
 moon = Body(
     "moon",
-    40,
-    (50,50),
-    (-0.107,0.803),
+    20,
+    (100,0),
+    (0,1.0),
     5
 )
 
-mars=Body("mars",60,(250,250),(0,0),6)
+mars = Body(
+    "mars",
+    10,
+    (180,0),
+    (0,0.75),
+    4
+)
 
 bodies=[earth,moon,mars]
 
@@ -67,6 +73,8 @@ time=0
 
 
 for i in range(5000):
+
+    print(i)
 
     dist=physics.update_nbody(bodies,dt)
 

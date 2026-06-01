@@ -11,6 +11,7 @@ class Body:
         self.vel = np.array(vel, dtype=float)
         self.xhist=[]
         self.yhist=[]
+        self.acc=np.array[0.0,0.0]
 
         self.rad = rad
 
@@ -21,4 +22,5 @@ class space_craft:
         self.launch=launch
         self.mass=mass
         self.target=target
-        
+
+
