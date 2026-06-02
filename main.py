@@ -9,8 +9,8 @@ from animation import animate
 # v = sqrt(G * M_sun / r) = sqrt(4π² / r) for each planet
 
 G  = 4 * math.pi**2
-dt = 0.0001
-steps = 100000
+dt = 0.001
+steps = 10000
 
 sun     = Body("sun",     1.0,       (0.000, 0),  (0,  0.000),   0.00465 )
 mercury = Body("mercury", 1.651e-7,  (0.387, 0),  (0,  10.1001), 0.000016)
