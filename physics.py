@@ -163,6 +163,11 @@ def update_nbody(bodies, dt, use_clusters=False):
     else:
         to_add, to_remove = _detect_collisions(bodies)
 
+    merge_events = [
+        {"removed": [b.name for b in to_remove], "created": new_body.name}
+        for new_body in to_add
+    ] if to_remove else []
+
     dt2_half = 0.5 * dt * dt
     dt_half  = 0.5 * dt
 
@@ -188,6 +193,8 @@ def update_nbody(bodies, dt, use_clusters=False):
             bodies.remove(body)
 
     bodies.extend(to_add)
+
+    return merge_events
 
 
 def update(body1, body2, dt):

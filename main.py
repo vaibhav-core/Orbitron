@@ -1,16 +1,10 @@
 import math
-import physics
-import save as savemod
 from bodeis import Body
-from simulation import run_simulation
-from animation import animate
-
-# AU, solar masses, years — G = 4π² in these units
-# v = sqrt(G * M_sun / r) = sqrt(4π² / r) for each planet
+from simulation import run_live_simulation
+from unity_bridge import UnityBridge
 
 G  = 4 * math.pi**2
-dt = 0.001
-steps = 10000
+dt = 0.0001
 
 sun     = Body("sun",     1.0,       (0.000, 0),  (0,  0.000),   0.00465 )
 mercury = Body("mercury", 1.651e-7,  (0.387, 0),  (0,  10.1001), 0.000016)
@@ -24,14 +18,15 @@ neptune = Body("neptune", 5.151e-5,  (30.07, 0),  (0,  1.1458),  0.000165)
 
 bodies = [sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune]
 
-# zero total momentum — prevents sun drift from Jupiter's pull
 total_momentum = sum(b.mass * b.vel for b in bodies)
 sun.vel -= total_momentum / sun.mass
 
-run_simulation(bodies, steps=50000, dt=0.0001)
+bridge = UnityBridge(host="127.0.0.1", port=9000)
+bridge.start()
 
-def on_key(event, bodies):
-    if event.key == 's':
-        savemod.save(bodies)
-
-animate(bodies, on_key=on_key)
+try:
+    run_live_simulation(bodies, dt=dt, bridge=bridge, max_steps=None)
+except KeyboardInterrupt:
+    print("\nStopped by user.")
+finally:
+    bridge.stop()
