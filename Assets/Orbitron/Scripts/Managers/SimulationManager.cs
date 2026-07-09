@@ -1,0 +1,31 @@
+using UnityEngine;
+
+public class SimulationManager : MonoBehaviour
+{
+    public static SimulationManager Instance { get; private set; }
+
+    [Header("Debug")]
+    [SerializeField] private bool verboseLogging = false;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+    }
+
+    public void UpdateSimulation(SimulationState state)
+    {
+        if (verboseLogging)
+            Debug.Log($"[SimulationManager] step={state.step} t={state.simTime:F4}yr");
+
+        // handle merges first so dead bodies are removed before positions update
+        if (state.mergeEvents != null)
+        {
+            foreach (MergeEvent e in state.mergeEvents)
+                PlanetManager.Instance?.HandleMerge(e);
+        }
+
+        PlanetManager.Instance?.UpdateBodies(state);
+    }
+}
