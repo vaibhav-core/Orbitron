@@ -5,6 +5,14 @@ from unity_bridge import UnityBridge
 
 dt = 0.0001
 
+# ── Speed knob ────────────────────────────────────────────────────────────────
+# TARGET_SPEED = simulated years per real second.
+#   0.05  → 1 sim-year  = 20 s real  (Earth orbit lasts ~20 s) ← default
+#   0.1   → 1 sim-year  = 10 s real
+#   1.0   → 1 sim-year  =  1 s real  (very fast, hard to follow)
+#   None  → full CPU speed (original, useful for stress-testing physics)
+TARGET_SPEED = 0.05
+
 sun     = Body("sun",     1.0,       (0.000, 0),  (0,  0.000),   0.00465 )
 mercury = Body("mercury", 1.651e-7,  (0.387, 0),  (0,  10.1001), 0.000016)
 venus   = Body("venus",   2.447e-6,  (0.723, 0),  (0,  7.3894),  0.000040)
@@ -24,7 +32,8 @@ bridge = UnityBridge(host="127.0.0.1", port=9000)
 bridge.start()
 
 try:
-    run_live_simulation(bodies, dt=dt, bridge=bridge, max_steps=None)
+    run_live_simulation(bodies, dt=dt, bridge=bridge, max_steps=None,
+                        target_speed=TARGET_SPEED)
 except KeyboardInterrupt:
     print("\nStopped.")
 finally:

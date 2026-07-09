@@ -1,3 +1,4 @@
+import time
 import physics
 
 
@@ -29,14 +30,16 @@ def run_simulation(bodies, steps, dt):
 
 
 def run_live_simulation(bodies, dt, bridge, max_steps=None,
-                        print_every=500, broadcast_every=10):
+                        print_every=500, broadcast_every=10,
+                        target_speed=1.0):
     """
     Live simulation loop driven by the TCP bridge.
 
     broadcast_every: only send a TCP packet every N steps.
-    Physics runs at full CPU speed — Unity renders at its own framerate.
-    At dt=0.0001 and broadcast_every=10, Unity receives 1000 packets
-    per simulated year, which is more than enough for smooth animation.
+    target_speed: simulated years per real second. Default 1.0 means
+        1 simulated year takes 1 real second (Earth orbits in ~1 s).
+        Set to 0.05 for 1 sim-year per 20 real seconds (comfortable to watch).
+        Set to None to run at full CPU speed (original behaviour).
     """
     physics.initialize_accelerations(bodies)
 
@@ -50,6 +53,11 @@ def run_live_simulation(bodies, dt, bridge, max_steps=None,
     i              = 0
     sim_time       = 0.0
     last_body_count = len(bodies)
+
+    # throttle: compute wall-clock seconds per physics step
+    # step_wall = dt / target_speed  (e.g. dt=0.0001, speed=0.05 → 2 ms/step)
+    step_wall = (dt / target_speed) if target_speed else None
+    _t0 = time.perf_counter()    # reference time for drift correction
 
     while max_steps is None or i < max_steps:
 
@@ -96,6 +104,14 @@ def run_live_simulation(bodies, dt, bridge, max_steps=None,
                     f"step {i:5d} | t={sim_time:.4f}yr | bodies={len(bodies):2d} | "
                     f"E drift={E_drift:.8f}% | L drift={L_drift:.8f}%"
                 )
+
+        # ── throttle ─────────────────────────────────────────────────────────
+        if step_wall is not None:
+            # drift-corrected sleep: target wall time for this step
+            target_wall = _t0 + (i + 1) * step_wall
+            slack = target_wall - time.perf_counter()
+            if slack > 0:
+                time.sleep(slack)
 
         i += 1
 

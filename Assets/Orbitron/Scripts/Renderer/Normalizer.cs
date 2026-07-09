@@ -5,8 +5,10 @@ using UnityEngine;
 /// and Unity world-space units.
 ///
 /// Distance:  1 AU  = 100 Unity units  (linear)
-/// Radius:    power-curve compressed — preserves relative ordering without
-///            making small planets invisible or the Sun overwhelming the scene
+/// Radius:    power-curve compressed with exponent 0.60
+///            — preserves relative ordering and gives faithful visual ratios:
+///              Mercury ≈ 0.55× Earth, Jupiter ≈ 4.3× Earth, Sun ≈ 8× Earth
+///            (pure linear would make Mercury invisible and Sun cover the scene)
 /// Velocity:  AU/yr → Unity units/yr  (same linear factor as distance)
 /// Time:      simulation years → human-readable string
 /// Mass:      solar masses → Earth masses or solar masses for display
@@ -19,10 +21,13 @@ public static class Normalizer
     public const float DistanceScale    = 100f;
     public const float VelocityScale    = DistanceScale;
 
-    public const float RadiusExponent   = 0.45f;
-    public const float RadiusVisualBase = 1.5f;
-    public const float MinVisualRadius  = 0.3f;
-    public const float MaxVisualRadius  = 15f;
+    // Exponent 0.60 gives faithful relative sizes while keeping all planets visible.
+    // Increase toward 1.0 for more realistic (but smaller inner planet) ratios.
+    // Decrease toward 0.3 for a more even/artistic look.
+    public const float RadiusExponent   = 0.60f;
+    public const float RadiusVisualBase = 2.0f;
+    public const float MinVisualRadius  = 0.4f;
+    public const float MaxVisualRadius  = 16f;
 
     public const float EarthRadiusAU    = 4.2635e-5f;
     public const float EarthMassSolar   = 3.003e-6f;
