@@ -15,7 +15,7 @@ public class TCPClient : MonoBehaviour
     [SerializeField] private int port    = 9000;
 
     [Header("Debug")]
-    [SerializeField] private bool verboseLogging = false;
+    [SerializeField] private bool verboseLogging = true;
 
     private TcpClient       _client;
     private NetworkStream   _stream;
@@ -33,6 +33,7 @@ public class TCPClient : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
     }
 
