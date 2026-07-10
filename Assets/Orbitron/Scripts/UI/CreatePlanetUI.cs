@@ -26,10 +26,14 @@ public class CreatePlanetUI : MonoBehaviour
     [SerializeField] private Button     spawnButton;
     [SerializeField] private TMP_Text   statusText;
 
-    private void Start()
+    // Awake() runs even when the GameObject is inactive at scene load.
+    // Start() does NOT run if the GameObject is inactive — the panel starts
+    // hidden, so Start() would be silently skipped and the button would have
+    // no listeners. Awake() is the correct hook here.
+    private void Awake()
     {
         if (spawnButton == null)
-            spawnButton = GetComponentInChildren<Button>();
+            spawnButton = GetComponentInChildren<Button>(true); // true = include inactive
 
         if (spawnButton != null)
         {
