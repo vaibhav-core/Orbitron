@@ -5,12 +5,13 @@ public class SimulationManager : MonoBehaviour
     public static SimulationManager Instance { get; private set; }
 
     [Header("Debug")]
-    [SerializeField] private bool verboseLogging = false;
+    [SerializeField] private bool verboseLogging = true;
 
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+        transform.SetParent(null);
         DontDestroyOnLoad(gameObject);
     }
 
