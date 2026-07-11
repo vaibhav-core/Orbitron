@@ -10,7 +10,7 @@ dt = 0.0001
 #   0.05  → 1 sim-year  = 20 s real  (Earth orbit lasts ~20 s) ← default
 #   0.1   → 1 sim-year  = 10 s real
 #   1.0   → 1 sim-year  =  1 s real  (very fast, hard to follow)
-#   None  → full CPU speed (original, useful for stress-testing physics)
+#   None  → full CPU speed ( useful for stress-testing physics)
 TARGET_SPEED = 0.05
 
 sun     = Body("sun",     1.0,       (0.000, 0),  (0,  0.000),   0.00465 )
