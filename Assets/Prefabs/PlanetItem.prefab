@@ -204,7 +204,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 632515505605762355}
-  - component: {fileID: 1826184154846827348}
+  - component: {fileID: 563097440852230730}
   m_Layer: 5
   m_Name: PlanetItem
   m_TagString: Untagged
@@ -234,7 +234,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 400, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1826184154846827348
+--- !u!114 &563097440852230730
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -243,7 +243,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3366647283458052400}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c2ab9c4d4c44c9d04876fcb29bead23a, type: 3}
+  m_Script: {fileID: 11500000, guid: bebc9007faed8b2e09d51523bdb25e97, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlanetItemUI
   planetName: {fileID: 5822645127572931969}

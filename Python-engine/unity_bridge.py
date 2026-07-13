@@ -176,7 +176,7 @@ class UnityBridge:
                     {
                         "name": b.name,
                         "parent": b.parent,
-                        "type": b.Body_type,
+                        "type": b.body_type,
                         "status": b.status,
 
                         "pos": [float(b.pos[0]), float(b.pos[1])],

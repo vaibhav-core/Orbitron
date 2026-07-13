@@ -24,6 +24,7 @@ public class PlanetInfoUI : MonoBehaviour
 
     public void ShowPlanet(BodyState body)
     {
+        Debug.Log("ShowPlanet called for: " + body.name);
         nameText.text = body.name;
         parentText.text = string.IsNullOrEmpty(body.parent) ? "None" : body.parent;
         typeText.text = body.type;

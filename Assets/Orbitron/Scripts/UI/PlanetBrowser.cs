@@ -9,6 +9,7 @@ public class PlanetBrowserUI : MonoBehaviour
 
     [SerializeField] private Transform content;
     [SerializeField] private GameObject planetItemPrefab;
+    [SerializeField] private PlanetInfoUI planetInfoUI;
 
     void Start()
     {
@@ -25,27 +26,39 @@ public class PlanetBrowserUI : MonoBehaviour
 
         foreach (string planet in planets)
         {
-         GameObject item = Instantiate(planetItemPrefab, content);
+            GameObject item = Instantiate(planetItemPrefab, content);
 
-         PlanetItemUI ui = item.GetComponent<PlanetItemUI>();
+            PlanetItemUI ui = item.GetComponent<PlanetItemUI>();
 
-         ui.SetName(planet);
-         ui.SetBrowser(this);
+            Debug.Log($"PlanetItemUI = {ui}");
 
-         Button btn = item.GetComponentInChildren<Button>();
-         btn.onClick.AddListener(ui.OnClick);
+            Button btn = item.GetComponentInChildren<Button>();
+
+            Debug.Log($"Button = {btn}");
+
+            ui.SetName(planet);
+            ui.SetBrowser(this);
+
+            btn.onClick.AddListener(ui.OnClick);
         }
     }
 
     public void SelectPlanet(PlanetItemUI item)
     {
+        Debug.Log("Clicked: " + item.PlanetName);
         if (selectedItem != null)
             selectedItem.SetSelected(false);
 
         selectedItem = item;
         selectedPlanet = item.PlanetName;
+        Debug.Log($"Selected: '{selectedPlanet}'");
 
         selectedItem.SetSelected(true);
+
+        BodyState body = PlanetManager.Instance.GetBodyState(selectedPlanet);
+        Debug.Log(body == null ? "BodyState is NULL" : "BodyState found: " + body.name);
+        if (body != null)
+        planetInfoUI.ShowPlanet(body);
 
         Debug.Log("Selected: " + selectedPlanet);
     }

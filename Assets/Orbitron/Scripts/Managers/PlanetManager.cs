@@ -9,7 +9,11 @@ public class PlanetManager : MonoBehaviour
     [SerializeField] private GameObject defaultPlanetPrefab;
 
     // tracks all live body GameObjects by name — single source of truth
-    private readonly Dictionary<string, GameObject> _bodies = new();
+    private readonly Dictionary<string, GameObject> _bodies =
+    new(System.StringComparer.OrdinalIgnoreCase);
+
+    private readonly Dictionary<string, BodyState> _bodyStates =
+    new(System.StringComparer.OrdinalIgnoreCase);
 
     private void Awake()
     {
@@ -34,7 +38,10 @@ public class PlanetManager : MonoBehaviour
         if (state.bodies == null) return;
 
         foreach (BodyState body in state.bodies)
+        
         {
+            _bodyStates[body.name] = body;
+            Debug.Log($"Cached: '{body.name}'");
             if (!_bodies.TryGetValue(body.name, out GameObject planet))
                 planet = SpawnBody(body);
 
@@ -62,6 +69,7 @@ public class PlanetManager : MonoBehaviour
                 {
                     Destroy(dead);
                     _bodies.Remove(removedName);
+                    _bodyStates.Remove(removedName);
                 }
             }
         }
@@ -107,4 +115,9 @@ public class PlanetManager : MonoBehaviour
         _bodies.TryGetValue(name, out GameObject go);
         return go;
     }
+    public BodyState GetBodyState(string name)
+{
+    _bodyStates.TryGetValue(name, out BodyState body);
+    return body;
+}
 }

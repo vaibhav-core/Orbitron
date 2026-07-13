@@ -13,23 +13,20 @@ def merge(body1, body2):
     new_acc  = (body1.mass * body1.acc + body2.mass * body2.acc) * inv_mass
     rad_new  = (body1.rad**3 + body2.rad**3) ** (1.0 / 3.0)
 
-    # Determine merged body type
-    if body1.type == "Star" or body2.type == "Star":
+    if body1.body_type == "Star" or body2.body_type == "Star":
         merged_type = "Star"
-
-    elif body1.type == "Planet" or body2.type == "Planet":
+    elif body1.body_type == "Planet" or body2.body_type == "Planet":
         merged_type = "Planet"
-
-    elif body1.type == "Moon" or body2.type == "Moon":
+    elif body1.body_type == "Moon" or body2.body_type == "Moon":
         merged_type = "Moon"
-
     else:
         merged_type = "Asteroid"
-    body3= Body(f"{body1.name}+{body2.name}", new_mass, new_pos, new_vel, rad_new,merged_type)
-    body3.acc = new_acc
-    body3.status = "Merged"
+
+    body3              = Body(f"{body1.name}+{body2.name}", new_mass, new_pos, new_vel, rad_new, merged_type)
+    body3.acc          = new_acc
+    body3.status       = "Merged"
     body3.status_timer = 60
-    body3.parent=None
+    body3.parent       = None
     return body3
 
 
@@ -69,9 +66,9 @@ def _detect_collisions(bodies):
             dist2 = r[0]*r[0] + r[1]*r[1]
             touch = body1.rad + body2.rad
             if dist2 < touch * touch:
-                print(f"Collision: {body1.name} + {body2.name}")    
-                body1.status = "Colliding"
-                body2.status = "Colliding"
+                print(f"Collision: {body1.name} + {body2.name}")
+                body1.status       = "Colliding"
+                body2.status       = "Colliding"
                 body1.status_timer = 30
                 body2.status_timer = 30
                 to_add.append(merge(body1, body2))
@@ -182,16 +179,11 @@ def update_nbody(bodies, dt, use_clusters=False):
     else:
         to_add, to_remove = _detect_collisions(bodies)
 
-    # build merge events — each pair mapped individually, not all-to-all
-    # to_add[k] corresponds to the k-th merged body created this tick
-    # but _detect_collisions only adds one merged body per pair so we can
-    # zip them if we track which bodies produced which merge
     merge_events = []
     if to_remove:
         removed_names = [b.name for b in to_remove]
         for new_body in to_add:
-            # extract the two source names from the merged name "A+B"
-            parts = new_body.name.split("+")
+            parts    = new_body.name.split("+")
             involved = [n for n in removed_names if n in parts]
             merge_events.append({"removed": involved, "created": new_body.name})
 
@@ -250,84 +242,71 @@ def update(body1, body2, dt):
 
 
 def update_body_properties(bodies):
-    stars = [b for b in bodies if b.Body_type == "Star"]     
+    """
+    Compute per-body derived quantities every tick:
+    orbital velocity, escape velocity, orbital period,
+    total energy, parent body, and stability status.
+    """
+    stars = [b for b in bodies if b.body_type == "Star"]
+
     for body in bodies:
+        ke = 0.5 * body.mass * float(np.dot(body.vel, body.vel))
+        body.orbital_velocity = float(np.linalg.norm(body.vel))
 
-        # Speed magnitude
-        body.orbital_velocity = np.linalg.norm(body.vel)
-
-        # Kinetic energy
-        ke = 0.5 * body.mass * np.dot(body.vel, body.vel)
-
-        # Find parent (largest gravitational influence)
-        parent = None
-        max_force = -1.0
-
-        # Special handling for stars
-        if body.Body_type == "Star":
-        
-            if len(stars) == 1:
+        # ── Stars: special case ───────────────────────────────────────────────
+        if body.body_type == "Star":
+            if len(stars) <= 1:
                 body.parent = None
-
             else:
-                biggest = max(stars, key=lambda s: s.mass)
+                # parent of a star is the most massive other star
+                biggest = max((s for s in stars if s is not body), key=lambda s: s.mass)
+                body.parent = biggest.name
 
-                if body is biggest:
-                    body.parent = None
-                else:
-                    body.parent = biggest.name
+            body.escape_velocity = 0.0
+            body.orbital_period  = 0.0
+            body.total_energy    = ke
 
+            if body.status_timer > 0:
+                body.status_timer -= 1
+            else:
+                body.status = "Stable"
             continue
+
+        # ── Non-stars: find dominant gravitational influence ──────────────────
+        parent     = None
+        max_force  = -1.0
 
         for other in bodies:
             if other is body:
                 continue
-
-            r = other.pos - body.pos
-            dist = np.linalg.norm(r)
-
-            if dist < 1e-12:
+            r     = other.pos - body.pos
+            dist2 = float(r[0]*r[0] + r[1]*r[1])
+            if dist2 < 1e-12:
                 continue
-
-            force = G * body.mass * other.mass / (dist * dist)
-
+            force = G * body.mass * other.mass / dist2
             if force > max_force:
                 max_force = force
-                parent = other
+                parent    = other
 
         if parent is not None:
             body.parent = parent.name
+            r_vec       = parent.pos - body.pos
+            r           = float(np.linalg.norm(r_vec))
 
-            r = np.linalg.norm(parent.pos - body.pos)
-
-            body.escape_velocity = np.sqrt(
-                2 * G * parent.mass / r
+            body.escape_velocity = float(np.sqrt(2.0 * G * parent.mass / r))
+            body.orbital_period  = float(
+                2.0 * np.pi * np.sqrt(r**3 / (G * (parent.mass + body.mass)))
             )
-
-            body.orbital_period = (
-                2 * np.pi *
-                np.sqrt(
-                (r ** 3) /
-                (G * (parent.mass + body.mass))
-                    )
-            )
-
-            pe = -G * body.mass * parent.mass / r
-
+            pe               = -G * body.mass * parent.mass / r
             body.total_energy = ke + pe
-            if body.total_energy > 0:
-                 body.status = "Escaping"
-
         else:
-            body.parent = "None"
+            body.parent          = None
             body.escape_velocity = 0.0
-            body.orbital_period = 0.0
-            body.total_energy = ke
+            body.orbital_period  = 0.0
+            body.total_energy    = ke
 
-            if body.status_timer > 0:
-                 body.status_timer -= 1
-            else:
-                 if body.total_energy > 0:
-                     body.status = "Escaping"
-                 else:
-                    body.status = "Stable"
+        # ── Status update ─────────────────────────────────────────────────────
+        if body.status_timer > 0:
+            body.status_timer -= 1
+        else:
+            body.status = "Escaping" if body.total_energy > 0 else "Stable"

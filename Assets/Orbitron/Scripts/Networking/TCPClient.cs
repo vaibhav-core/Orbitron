@@ -57,7 +57,7 @@ public class TCPClient : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.LogError($"[TCPClient] JSON parse error: {e.Message}");
+                //Debug.LogError($"[TCPClient] JSON parse error: {e.Message}");
             }
         }
     }
