@@ -2256,10 +2256,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1555493299}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 613ea8e6ebfe41045aa37ece05842a0d, type: 3}
+  m_Script: {fileID: 11500000, guid: 91a6590b9cf79154fa36dc36f4be3701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SimulationManager
-  verboseLogging: 1
+  verboseLogging: 0
 --- !u!1 &1918137694
 GameObject:
   m_ObjectHideFlags: 0
@@ -2306,6 +2306,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlanetBrowserUI
   content: {fileID: 587802200}
   planetItemPrefab: {fileID: 3366647283458052400, guid: cf70dd0bda26b37609fc5cc681fdfa08, type: 3}
+  planetInfoUI: {fileID: 2072267426}
 --- !u!1 &1948846934
 GameObject:
   m_ObjectHideFlags: 0
