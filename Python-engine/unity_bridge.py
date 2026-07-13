@@ -172,13 +172,25 @@ class UnityBridge:
             "angular_momentum": angular_momentum,
             "merge_events":     merge_events or [],
             "bodies": [
-                {
-                    "name": b.name,
-                    "pos":  [float(b.pos[0]), float(b.pos[1])],
-                    "vel":  [float(b.vel[0]), float(b.vel[1])],
-                    "acc":  [float(b.acc[0]), float(b.acc[1])],
-                    "mass": float(b.mass),
-                    "rad":  float(b.rad)
+                
+                    {
+                        "name": b.name,
+                        "parent": b.parent,
+                        "type": b.Body_type,
+                        "status": b.status,
+
+                        "pos": [float(b.pos[0]), float(b.pos[1])],
+                        "vel": [float(b.vel[0]), float(b.vel[1])],
+                        "acc": [float(b.acc[0]), float(b.acc[1])],
+
+                        "mass": float(b.mass),
+                        "rad": float(b.rad),
+
+                        "escape_velocity": b.escape_velocity,
+                        "orbital_velocity": b.orbital_velocity,
+                        "orbital_period": b.orbital_period,
+                        "total_energy": b.total_energy
+                    
                 }
                 for b in bodies
             ]

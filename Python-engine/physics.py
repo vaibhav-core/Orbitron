@@ -12,8 +12,24 @@ def merge(body1, body2):
     new_vel  = (body1.mass * body1.vel + body2.mass * body2.vel) * inv_mass
     new_acc  = (body1.mass * body1.acc + body2.mass * body2.acc) * inv_mass
     rad_new  = (body1.rad**3 + body2.rad**3) ** (1.0 / 3.0)
-    body3     = Body(f"{body1.name}+{body2.name}", new_mass, new_pos, new_vel, rad_new)
+
+    # Determine merged body type
+    if body1.type == "Star" or body2.type == "Star":
+        merged_type = "Star"
+
+    elif body1.type == "Planet" or body2.type == "Planet":
+        merged_type = "Planet"
+
+    elif body1.type == "Moon" or body2.type == "Moon":
+        merged_type = "Moon"
+
+    else:
+        merged_type = "Asteroid"
+    body3= Body(f"{body1.name}+{body2.name}", new_mass, new_pos, new_vel, rad_new,merged_type)
     body3.acc = new_acc
+    body3.status = "Merged"
+    body3.status_timer = 60
+    body3.parent=None
     return body3
 
 
@@ -53,7 +69,11 @@ def _detect_collisions(bodies):
             dist2 = r[0]*r[0] + r[1]*r[1]
             touch = body1.rad + body2.rad
             if dist2 < touch * touch:
-                print(f"Collision: {body1.name} + {body2.name}")
+                print(f"Collision: {body1.name} + {body2.name}")    
+                body1.status = "Colliding"
+                body2.status = "Colliding"
+                body1.status_timer = 30
+                body2.status_timer = 30
                 to_add.append(merge(body1, body2))
                 to_remove.add(body1)
                 to_remove.add(body2)
@@ -200,7 +220,7 @@ def update_nbody(bodies, dt, use_clusters=False):
             bodies.remove(body)
 
     bodies.extend(to_add)
-
+    update_body_properties(bodies)
     return merge_events
 
 
@@ -227,3 +247,87 @@ def update(body1, body2, dt):
     body2.acc  = new_acc2
 
     return dist
+
+
+def update_body_properties(bodies):
+    stars = [b for b in bodies if b.Body_type == "Star"]     
+    for body in bodies:
+
+        # Speed magnitude
+        body.orbital_velocity = np.linalg.norm(body.vel)
+
+        # Kinetic energy
+        ke = 0.5 * body.mass * np.dot(body.vel, body.vel)
+
+        # Find parent (largest gravitational influence)
+        parent = None
+        max_force = -1.0
+
+        # Special handling for stars
+        if body.Body_type == "Star":
+        
+            if len(stars) == 1:
+                body.parent = None
+
+            else:
+                biggest = max(stars, key=lambda s: s.mass)
+
+                if body is biggest:
+                    body.parent = None
+                else:
+                    body.parent = biggest.name
+
+            continue
+
+        for other in bodies:
+            if other is body:
+                continue
+
+            r = other.pos - body.pos
+            dist = np.linalg.norm(r)
+
+            if dist < 1e-12:
+                continue
+
+            force = G * body.mass * other.mass / (dist * dist)
+
+            if force > max_force:
+                max_force = force
+                parent = other
+
+        if parent is not None:
+            body.parent = parent.name
+
+            r = np.linalg.norm(parent.pos - body.pos)
+
+            body.escape_velocity = np.sqrt(
+                2 * G * parent.mass / r
+            )
+
+            body.orbital_period = (
+                2 * np.pi *
+                np.sqrt(
+                (r ** 3) /
+                (G * (parent.mass + body.mass))
+                    )
+            )
+
+            pe = -G * body.mass * parent.mass / r
+
+            body.total_energy = ke + pe
+            if body.total_energy > 0:
+                 body.status = "Escaping"
+
+        else:
+            body.parent = "None"
+            body.escape_velocity = 0.0
+            body.orbital_period = 0.0
+            body.total_energy = ke
+
+            if body.status_timer > 0:
+                 body.status_timer -= 1
+            else:
+                 if body.total_energy > 0:
+                     body.status = "Escaping"
+                 else:
+                    body.status = "Stable"

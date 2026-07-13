@@ -25,7 +25,19 @@ public class SimulationManager : MonoBehaviour
         {
             foreach (MergeEvent e in state.mergeEvents)
                 PlanetManager.Instance?.HandleMerge(e);
+
         }
+        foreach (BodyState body in state.bodies)
+    {
+        Debug.Log
+        (
+            $"{body.name} | {body.parent} | {body.type} | " +
+            $"{body.orbital_velocity} | {body.escape_velocity}"
+           
+        );
+
+         Debug.Log($"{body.name} | {body.orbital_period:F3} yr");
+    }
 
         PlanetManager.Instance?.UpdateBodies(state);
     }
