@@ -22,12 +22,22 @@ public class SimulationManager : MonoBehaviour
           //  Debug.Log($"[SimulationManager] step={state.step} t={state.simTime:F4}yr");
 
         // handle merges first so dead bodies are removed before positions update
-        if (state.mergeEvents != null)
-        {
-            foreach (MergeEvent e in state.mergeEvents)
-                PlanetManager.Instance?.HandleMerge(e);
+       if (state.mergeEvents != null)
+{
+    Debug.Log($"Merge Events: {state.mergeEvents?.Length}");
+    foreach (MergeEvent e in state.mergeEvents)
+    {
+        PlanetManager.Instance?.HandleMerge(e);
 
-        }
+        CollisionHistoryUI.Instance?.AddCollision(
+            state.simTime,
+            e.removed[0],
+            e.removed[1],
+            e.created
+        );
+    }
+}
+        
        
 
         PlanetManager.Instance?.UpdateBodies(state);

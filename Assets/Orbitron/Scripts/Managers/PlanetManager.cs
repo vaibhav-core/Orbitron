@@ -41,7 +41,7 @@ public class PlanetManager : MonoBehaviour
         
         {
             _bodyStates[body.name] = body;
-            Debug.Log($"Cached: '{body.name}'");
+            //Debug.Log($"Cached: '{body.name}'");
             if (!_bodies.TryGetValue(body.name, out GameObject planet))
                 planet = SpawnBody(body);
 
@@ -99,7 +99,7 @@ public class PlanetManager : MonoBehaviour
         GameObject go = Instantiate(defaultPlanetPrefab, pos, Quaternion.identity);
         go.name = body.name;
 
-        Debug.Log($"{body.name} rad={body.rad}");
+      //  Debug.Log($"{body.name} rad={body.rad}");
 
         float visualDiameter = Normalizer.NormalizeRadius((float)body.rad);
         go.transform.localScale = Vector3.one * visualDiameter;

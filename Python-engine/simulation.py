@@ -72,6 +72,8 @@ def run_live_simulation(bodies, dt, bridge, max_steps=None,
         # 3. advance physics — returns merge events that happened this tick
         merge_events = physics.update_nbody(bodies, dt)
         sim_time    += dt
+        if merge_events:
+            print("Broadcast merge events:", merge_events)
 
         # 4. reseed if a merge just happened inside update_nbody
         if len(bodies) != last_body_count:
@@ -84,7 +86,12 @@ def run_live_simulation(bodies, dt, bridge, max_steps=None,
             body.yhist.append(body.pos[1])
 
         # 6. broadcast — throttled so TCP buffer doesn't back up
-        if i % broadcast_every == 0:
+        should_broadcast = (
+            i % broadcast_every == 0
+                or len(merge_events) > 0
+                )
+
+        if should_broadcast:
             E = physics.total_energy(bodies)
             L = physics.angular_momentum(bodies)
 
@@ -96,6 +103,8 @@ def run_live_simulation(bodies, dt, bridge, max_steps=None,
                 angular_momentum=L,
                 merge_events=merge_events
             )
+            if merge_events:
+                print("Broadcast merge events:", merge_events)
 
             if i % print_every == 0:
                 E_drift = abs((E - energy_0) / energy_0) * 100 if energy_0 != 0 else 0

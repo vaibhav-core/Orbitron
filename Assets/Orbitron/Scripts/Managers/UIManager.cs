@@ -14,7 +14,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private PlanetInfoUI planetInfoUI;
 
     [Header("Toggle Key")]
-    [SerializeField] private KeyCode toggleKey = KeyCode.M;
+    [SerializeField] private KeyCode browserKey = KeyCode.M;
+    [SerializeField] private KeyCode collisionKey = KeyCode.L;
 
     public bool IsPaused { get; private set; }
 
@@ -33,17 +34,24 @@ public class UIManager : MonoBehaviour
         HideAllPanels();
     }
 
-    private void Update()
+ private void Update()
+{
+    if (Input.GetKeyDown(browserKey))
     {
-        if (Input.GetKeyDown(toggleKey))
-        {
-            if (planetBrowserPanel.activeSelf)
-                ClosePlanetBrowser();
-            else
-                OpenPlanetBrowser();
-        }
+        if (planetBrowserPanel.activeSelf)
+            ClosePlanetBrowser();
+        else
+            OpenPlanetBrowser();
     }
 
+    if (Input.GetKeyDown(collisionKey))
+    {
+        if (collisionPanel.activeSelf)
+            CloseCollisionPanel();
+        else
+            OpenCollisionPanel();
+    }
+}
     private void HideAllPanels()
     {
         if (planetBrowserPanel != null) planetBrowserPanel.SetActive(false);

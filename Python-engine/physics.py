@@ -178,7 +178,7 @@ def update_nbody(bodies, dt, use_clusters=False):
         to_add, to_remove = _cluster_collisions(bodies)
     else:
         to_add, to_remove = _detect_collisions(bodies)
-
+    
     merge_events = []
     if to_remove:
         removed_names = [b.name for b in to_remove]
@@ -213,6 +213,8 @@ def update_nbody(bodies, dt, use_clusters=False):
 
     bodies.extend(to_add)
     update_body_properties(bodies)
+    if merge_events:
+        print("Physics merge events:", merge_events)
     return merge_events
 
 

@@ -165,6 +165,7 @@ class UnityBridge:
 
     def broadcast_state(self, bodies, sim_time, step, energy, angular_momentum,
                         merge_events=None):
+        #print(merge_events)
         payload = {
             "step":             step,
             "sim_time":         sim_time,
