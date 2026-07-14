@@ -93,7 +93,7 @@ public class CreatePlanetUI : MonoBehaviour
         PlanetManager.Instance?.RequestSpawn(data);
 
         SetStatus($"Spawn request sent for '{bName}'.");
-        UIManager.Instance?.ClosePanel();
+        UIManager.Instance?.ClosePlanetBrowser();
     }
 
     private void SetStatus(string msg)

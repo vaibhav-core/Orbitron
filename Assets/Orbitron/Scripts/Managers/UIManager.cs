@@ -1,12 +1,15 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
 
-    [Header("Panel")]
-    [SerializeField] private GameObject planetCreatorPanel;
+    [Header("Panels")]
+    [SerializeField] private GameObject planetBrowserPanel;
+    [SerializeField] private GameObject planetInfoPanel;
+    [SerializeField] private GameObject spawnPanel;
+    [SerializeField] private GameObject editPanel;
+    [SerializeField] private GameObject collisionPanel;
 
     [Header("Toggle Key")]
     [SerializeField] private KeyCode toggleKey = KeyCode.M;
@@ -17,79 +20,124 @@ public class UIManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("[UIManager] Duplicate detected — destroying this instance. " +
-                             "Check DontDestroyOnLoad objects for stale UIManager.");
+            Debug.LogWarning("[UIManager] Duplicate UIManager detected.");
             Destroy(gameObject);
             return;
         }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
 
-        // Hide panel at startup regardless of its default active state.
-        // Do NOT call SetActive here — panel may not be in the hierarchy yet if
-        // it is a prefab that is instantiated later. ClosePanel() handles everything.
-        if (planetCreatorPanel != null)
-            planetCreatorPanel.SetActive(false);
-        else
-            Debug.LogError("[UIManager] planetCreatorPanel is not assigned in the Inspector!");
+        HideAllPanels();
     }
 
-    // Update() runs regardless of Time.timeScale — Unity's Input polling is
-    // not affected by timeScale, so the M key toggle works even when paused.
     private void Update()
     {
         if (Input.GetKeyDown(toggleKey))
         {
-            if (IsPaused) ClosePanel();
-            else          OpenPanel();
+            if (planetBrowserPanel.activeSelf)
+                ClosePlanetBrowser();
+            else
+                OpenPlanetBrowser();
         }
     }
 
-    public void OpenPanel()
+    private void HideAllPanels()
     {
-        if (planetCreatorPanel == null)
-        {
-            Debug.LogError("[UIManager] OpenPanel() called but planetCreatorPanel is null. " +
-                           "Assign it in the Inspector on the UIManager GameObject.");
-            return;
-        }
+        if (planetBrowserPanel != null) planetBrowserPanel.SetActive(false);
+        if (planetInfoPanel != null) planetInfoPanel.SetActive(false);
+        if (spawnPanel != null) spawnPanel.SetActive(false);
+        if (editPanel != null) editPanel.SetActive(false);
+        if (collisionPanel != null) collisionPanel.SetActive(false);
+    }
 
-        IsPaused       = true;
+    // ==========================================================
+    // Planet Browser
+    // ==========================================================
+
+    public void OpenPlanetBrowser()
+    {
+        IsPaused = true;
         Time.timeScale = 0f;
 
-        // Unlock the cursor so the player can interact with the UI.
-        // With Input System "Both" mode, setting CursorLockMode.None is enough —
-        // no need to disable the PlayerInput component.
         Cursor.lockState = CursorLockMode.None;
-        Cursor.visible   = true;
+        Cursor.visible = true;
 
-        planetCreatorPanel.SetActive(true);
-
-        // Ensure the panel's CanvasGroup (if any) is fully interactable.
-        // A disabled CanvasGroup is the most common cause of "visible but not clickable".
-        CanvasGroup cg = planetCreatorPanel.GetComponent<CanvasGroup>();
-        if (cg != null)
-        {
-            cg.alpha          = 1f;
-            cg.interactable   = true;
-            cg.blocksRaycasts = true;
-        }
-
-        Debug.Log($"[UIManager] OpenPanel — timeScale={Time.timeScale}, " +
-                  $"panel active={planetCreatorPanel.activeSelf}");
+        planetBrowserPanel.SetActive(true);
     }
 
-    public void ClosePanel()
+    public void ClosePlanetBrowser()
     {
-        IsPaused       = false;
+        HideAllPanels();
+
+        IsPaused = false;
         Time.timeScale = 1f;
 
         Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible   = false;
+        Cursor.visible = false;
+    }
 
-        if (planetCreatorPanel != null)
-            planetCreatorPanel.SetActive(false);
+    // ==========================================================
+    // Planet Info
+    // ==========================================================
 
-        Debug.Log("[UIManager] ClosePanel — timeScale restored to 1.");
+    public void OpenPlanetInfo()
+    {
+        if (planetInfoPanel != null)
+            planetInfoPanel.SetActive(true);
+    }
+
+    public void ClosePlanetInfo()
+    {
+        if (planetInfoPanel != null)
+            planetInfoPanel.SetActive(false);
+    }
+
+    // ==========================================================
+    // Spawn Panel
+    // ==========================================================
+
+    public void OpenSpawnPanel()
+    {
+        if (spawnPanel != null)
+            spawnPanel.SetActive(true);
+    }
+
+    public void CloseSpawnPanel()
+    {
+        if (spawnPanel != null)
+            spawnPanel.SetActive(false);
+    }
+
+    // ==========================================================
+    // Edit Panel
+    // ==========================================================
+
+    public void OpenEditPanel()
+    {
+        if (editPanel != null)
+            editPanel.SetActive(true);
+    }
+
+    public void CloseEditPanel()
+    {
+        if (editPanel != null)
+            editPanel.SetActive(false);
+    }
+
+    // ==========================================================
+    // Collision Panel
+    // ==========================================================
+
+    public void OpenCollisionPanel()
+    {
+        if (collisionPanel != null)
+            collisionPanel.SetActive(true);
+    }
+
+    public void CloseCollisionPanel()
+    {
+        if (collisionPanel != null)
+            collisionPanel.SetActive(false);
     }
 }
