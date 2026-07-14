@@ -6,6 +6,7 @@ public class SimulationManager : MonoBehaviour
 
     [Header("Debug")]
     [SerializeField] private bool verboseLogging = true;
+    [SerializeField] private PlanetBrowserUI planetBrowserUI;
 
     private void Awake()
     {
@@ -27,19 +28,9 @@ public class SimulationManager : MonoBehaviour
                 PlanetManager.Instance?.HandleMerge(e);
 
         }
-        //foreach (BodyState body in state.bodies)
-    //{
-        // Debug.Log
-        // (
-        //     $"{body.name} | {body.parent} | {body.type} | " +
-        //     $"{body.orbital_velocity} | {body.escape_velocity}"
-           
-        // );
-        
-
-        //  Debug.Log($"{body.name} | {body.orbital_period:F3} yr");
-   // }
+       
 
         PlanetManager.Instance?.UpdateBodies(state);
+        planetBrowserUI.RefreshPlanetList(state);
     }
 }

@@ -10,6 +10,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject spawnPanel;
     [SerializeField] private GameObject editPanel;
     [SerializeField] private GameObject collisionPanel;
+    [SerializeField] private PlanetBrowserUI planetBrowserUI;
+    [SerializeField] private PlanetInfoUI planetInfoUI;
 
     [Header("Toggle Key")]
     [SerializeField] private KeyCode toggleKey = KeyCode.M;
@@ -81,10 +83,15 @@ public class UIManager : MonoBehaviour
     // Planet Info
     // ==========================================================
 
-    public void OpenPlanetInfo()
+   public void OpenPlanetInfo()
     {
-        if (planetInfoPanel != null)
-            planetInfoPanel.SetActive(true);
+        BodyState body = planetBrowserUI.GetSelectedBody();
+
+        if (body == null)
+            return;
+
+        planetInfoPanel.SetActive(true);
+        planetInfoUI.ShowPlanet(body);
     }
 
     public void ClosePlanetInfo()
