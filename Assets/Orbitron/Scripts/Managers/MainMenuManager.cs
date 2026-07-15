@@ -1,44 +1,174 @@
 using UnityEngine;
+using TMPro;
+using System.Collections;
 
 public class MainMenuManager : MonoBehaviour
 {
+    public static MainMenuManager Instance { get; private set; }
+
     [Header("Panels")]
-    [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject loadingPanel;
+    [SerializeField] private GameObject mainMenuPanel;
     [SerializeField] private GameObject controlsPanel;
+    [SerializeField] private GameObject loadPanel;
+    [SerializeField] private GameObject pausePanel;
 
-    [Header("Simulation")]
-    [SerializeField] private GameObject simulationUI;
+    [Header("Loading")]
+    [SerializeField] private TMP_Text statusText;
+    [SerializeField] private float loadingDelay = 0.8f;
 
-    // PLAY
-    public void Play()
+    private bool gameStarted = false;
+    private bool controlsOpenedFromPause = false;
+
+    private void Awake()
     {
-        mainMenuPanel.SetActive(false);
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+    }
+
+    private void Start()
+    {
+        HideAllMenus();
+        StartCoroutine(StartupSequence());
+    }
+
+    private void Update()
+    {
+        if (!gameStarted)
+            return;
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (pausePanel.activeSelf)
+                Resume();
+            else
+                OpenPause();
+        }
+    }
+
+    private IEnumerator StartupSequence()
+    {
+        InputManager.Instance.EnterUI();
+
         loadingPanel.SetActive(true);
 
-        // We'll hook the actual simulation start here later.
+        yield return Show("Loading celestial meshes...");
+        yield return Show("Loading planetary textures...");
+        yield return Show("Starting Python physics engine...");
+        yield return Show("Connecting TCP bridge...");
+        yield return Show("Initializing simulation...");
+        yield return Show("Ready.");
+
+        loadingPanel.SetActive(false);
+        mainMenuPanel.SetActive(true);
     }
 
-    // LOAD
-    public void Load()
+    private IEnumerator Show(string message)
     {
-        Debug.Log("Load not implemented yet.");
+        statusText.text = message;
+        yield return new WaitForSeconds(loadingDelay);
     }
 
+    private void HideAllMenus()
+    {
+        loadingPanel.SetActive(false);
+        mainMenuPanel.SetActive(false);
+        controlsPanel.SetActive(false);
+
+        if (loadPanel != null)
+            loadPanel.SetActive(false);
+
+        if (pausePanel != null)
+            pausePanel.SetActive(false);
+    }
+
+    // =====================================================
+    // PLAY
+    // =====================================================
+
+    public void Play()
+    {
+        HideAllMenus();
+
+        gameStarted = true;
+
+        InputManager.Instance.EnterGameplay();
+    }
+
+    // =====================================================
+    // LOAD
+    // =====================================================
+
+   public void OpenLoad()
+{
+    HideAllMenus();
+    loadPanel.SetActive(true);
+}
+
+public void CloseLoad()
+{
+    HideAllMenus();
+    mainMenuPanel.SetActive(true);
+}
+
+
+    // =====================================================
     // CONTROLS
+    // =====================================================
+
     public void OpenControls()
     {
+        controlsOpenedFromPause = pausePanel != null && pausePanel.activeSelf;
+
+        HideAllMenus();
         controlsPanel.SetActive(true);
-        mainMenuPanel.SetActive(false);
     }
 
     public void CloseControls()
     {
         controlsPanel.SetActive(false);
-        mainMenuPanel.SetActive(true);
+
+        if (controlsOpenedFromPause)
+        {
+            pausePanel.SetActive(true);
+        }
+        else
+        {
+            mainMenuPanel.SetActive(true);
+        }
     }
 
+    // =====================================================
+    // PAUSE
+    // =====================================================
+
+    public void OpenPause()
+    {
+        pausePanel.SetActive(true);
+
+        Time.timeScale = 0f;
+
+        InputManager.Instance.EnterUI();
+    }
+
+    public void Resume()
+    {
+        pausePanel.SetActive(false);
+
+        Time.timeScale = 1f;
+
+        InputManager.Instance.EnterGameplay();
+    }
+
+    // =====================================================
     // EXIT
+    // =====================================================
+
     public void Exit()
     {
 #if UNITY_EDITOR

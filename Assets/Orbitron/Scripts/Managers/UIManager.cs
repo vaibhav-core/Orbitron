@@ -10,9 +10,10 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject spawnPanel;
     [SerializeField] private GameObject editPanel;
     [SerializeField] private GameObject collisionPanel;
+    [SerializeField] private GameObject removePanel;
+
     [SerializeField] private PlanetBrowserUI planetBrowserUI;
     [SerializeField] private PlanetInfoUI planetInfoUI;
-    [SerializeField] private GameObject removePanel;
 
     [Header("Toggle Key")]
     [SerializeField] private KeyCode browserKey = KeyCode.M;
@@ -35,37 +36,25 @@ public class UIManager : MonoBehaviour
         HideAllPanels();
     }
 
-
-    public void OpenRemovePanel()
-{
-    removePanel.SetActive(true);
-
-    removePanel.GetComponent<RemoveConfirmationUI>().Refresh();
-}
-
-public void CloseRemovePanel()
-{
-    removePanel.SetActive(false);
-}
-
- private void Update()
-{
-    if (Input.GetKeyDown(browserKey))
+    private void Update()
     {
-        if (planetBrowserPanel.activeSelf)
-            ClosePlanetBrowser();
-        else
-            OpenPlanetBrowser();
+        if (Input.GetKeyDown(browserKey))
+        {
+            if (planetBrowserPanel.activeSelf)
+                ClosePlanetBrowser();
+            else
+                OpenPlanetBrowser();
+        }
+
+        if (Input.GetKeyDown(collisionKey))
+        {
+            if (collisionPanel.activeSelf)
+                CloseCollisionPanel();
+            else
+                OpenCollisionPanel();
+        }
     }
 
-    if (Input.GetKeyDown(collisionKey))
-    {
-        if (collisionPanel.activeSelf)
-            CloseCollisionPanel();
-        else
-            OpenCollisionPanel();
-    }
-}
     private void HideAllPanels()
     {
         if (planetBrowserPanel != null) planetBrowserPanel.SetActive(false);
@@ -73,6 +62,7 @@ public void CloseRemovePanel()
         if (spawnPanel != null) spawnPanel.SetActive(false);
         if (editPanel != null) editPanel.SetActive(false);
         if (collisionPanel != null) collisionPanel.SetActive(false);
+        if (removePanel != null) removePanel.SetActive(false);
     }
 
     // ==========================================================
@@ -84,8 +74,7 @@ public void CloseRemovePanel()
         IsPaused = true;
         Time.timeScale = 0f;
 
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
+        InputManager.Instance.EnterUI();
 
         planetBrowserPanel.SetActive(true);
     }
@@ -97,15 +86,14 @@ public void CloseRemovePanel()
         IsPaused = false;
         Time.timeScale = 1f;
 
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        InputManager.Instance.EnterGameplay();
     }
 
     // ==========================================================
     // Planet Info
     // ==========================================================
 
-   public void OpenPlanetInfo()
+    public void OpenPlanetInfo()
     {
         BodyState body = planetBrowserUI.GetSelectedBody();
 
@@ -155,11 +143,41 @@ public void CloseRemovePanel()
     }
 
     // ==========================================================
+    // Remove Panel
+    // ==========================================================
+
+    public void OpenRemovePanel()
+    {
+        IsPaused = true;
+        Time.timeScale = 0f;
+
+        InputManager.Instance.EnterUI();
+
+        removePanel.SetActive(true);
+        removePanel.GetComponent<RemoveConfirmationUI>().Refresh();
+    }
+
+    public void CloseRemovePanel()
+    {
+        removePanel.SetActive(false);
+
+        IsPaused = false;
+        Time.timeScale = 1f;
+
+        InputManager.Instance.EnterGameplay();
+    }
+
+    // ==========================================================
     // Collision Panel
     // ==========================================================
 
     public void OpenCollisionPanel()
     {
+        IsPaused = true;
+        Time.timeScale = 0f;
+
+        InputManager.Instance.EnterUI();
+
         if (collisionPanel != null)
             collisionPanel.SetActive(true);
     }
@@ -168,5 +186,10 @@ public void CloseRemovePanel()
     {
         if (collisionPanel != null)
             collisionPanel.SetActive(false);
+
+        IsPaused = false;
+        Time.timeScale = 1f;
+
+        InputManager.Instance.EnterGameplay();
     }
 }

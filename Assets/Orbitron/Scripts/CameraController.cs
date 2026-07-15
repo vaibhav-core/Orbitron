@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    public bool CanControl { get; set; } = true;
+
     [Header("Movement")]
     [SerializeField] private float moveSpeed = 10f;
     [SerializeField] private float sprintMultiplier = 5f;
@@ -21,12 +23,14 @@ public class CameraController : MonoBehaviour
 
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        // InputManager controls cursor state.
     }
 
     private void Update()
     {
+        if (!CanControl)
+            return;
+
         if (UIManager.Instance != null && UIManager.Instance.IsPaused)
             return;
 
@@ -90,26 +94,23 @@ public class CameraController : MonoBehaviour
         transform.position += movement * currentSpeed * Time.deltaTime;
     }
 
-    // Called by PlanetBrowserUI
-  public void FocusOn(Transform target)
-{
-    if (target == null)
-        return;
+    public void FocusOn(Transform target)
+    {
+        if (target == null)
+            return;
 
-    focusTarget = target;
+        focusTarget = target;
 
-    // Move camera to a nice viewing position
-    Vector3 desiredOffset = new Vector3(0, 3f, -8f);
+        Vector3 desiredOffset = new Vector3(0, 3f, -8f);
 
-    transform.position = target.position + desiredOffset;
-    focusOffset = desiredOffset;
+        transform.position = target.position + desiredOffset;
+        focusOffset = desiredOffset;
 
-    transform.LookAt(target);
-}
+        transform.LookAt(target);
+    }
 
     public void ClearFocus()
     {
-        
         focusTarget = null;
     }
 }
