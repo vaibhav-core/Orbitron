@@ -51,17 +51,18 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
+    // =====================================================
+    // Startup
+    // =====================================================
+
     private IEnumerator StartupSequence()
     {
         InputManager.Instance.EnterUI();
 
         loadingPanel.SetActive(true);
 
-        yield return Show("Loading celestial meshes...");
-        yield return Show("Loading planetary textures...");
-        yield return Show("Starting Python physics engine...");
-        yield return Show("Connecting TCP bridge...");
-        yield return Show("Initializing simulation...");
+        yield return Show("Loading UI...");
+        yield return Show("Loading assets...");
         yield return Show("Ready.");
 
         loadingPanel.SetActive(false);
@@ -93,6 +94,8 @@ public class MainMenuManager : MonoBehaviour
 
     public void Play()
     {
+        PythonLauncher.Instance.LaunchMain();
+
         HideAllMenus();
 
         gameStarted = true;
@@ -104,18 +107,28 @@ public class MainMenuManager : MonoBehaviour
     // LOAD
     // =====================================================
 
-   public void OpenLoad()
-{
-    HideAllMenus();
-    loadPanel.SetActive(true);
-}
+    public void OpenLoad()
+    {
+        HideAllMenus();
+        loadPanel.SetActive(true);
+    }
 
-public void CloseLoad()
-{
-    HideAllMenus();
-    mainMenuPanel.SetActive(true);
-}
+    public void CloseLoad()
+    {
+        HideAllMenus();
+        mainMenuPanel.SetActive(true);
+    }
 
+    public void LoadSolarSystem()
+    {
+        PythonLauncher.Instance.LaunchSolarSystem();
+
+        HideAllMenus();
+
+        gameStarted = true;
+
+        InputManager.Instance.EnterGameplay();
+    }
 
     // =====================================================
     // CONTROLS
@@ -134,13 +147,9 @@ public void CloseLoad()
         controlsPanel.SetActive(false);
 
         if (controlsOpenedFromPause)
-        {
             pausePanel.SetActive(true);
-        }
         else
-        {
             mainMenuPanel.SetActive(true);
-        }
     }
 
     // =====================================================
@@ -171,6 +180,8 @@ public void CloseLoad()
 
     public void Exit()
     {
+        PythonLauncher.Instance.CloseBackend();
+
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
