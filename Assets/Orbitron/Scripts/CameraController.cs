@@ -10,19 +10,35 @@ public class CameraController : MonoBehaviour
     [SerializeField] private float mouseSensitivity = 100f;
     [SerializeField] private float pitchClamp = 89f;
 
+    [Header("Focus")]
+    [SerializeField] private float followSpeed = 5f;
+
     private float yaw;
     private float pitch;
 
-    void Start()
+    private Transform focusTarget;
+    private Vector3 focusOffset;
+
+    private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
 
-    void Update()
+    private void Update()
     {
         if (UIManager.Instance != null && UIManager.Instance.IsPaused)
-            return; // menu is open — UIManager owns the cursor, camera stays frozen
+            return;
+
+        // Follow selected body
+        if (focusTarget != null)
+        {
+            transform.position = Vector3.Lerp(
+                transform.position,
+                focusTarget.position + focusOffset,
+                followSpeed * Time.deltaTime
+            );
+        }
 
         HandleMouseLook();
         HandleMovement();
@@ -41,17 +57,59 @@ public class CameraController : MonoBehaviour
 
     private void HandleMovement()
     {
+        // Manual movement cancels focus mode
+        if (Input.GetAxisRaw("Horizontal") != 0 ||
+            Input.GetAxisRaw("Vertical") != 0 ||
+            Input.GetKey(KeyCode.Space) ||
+            Input.GetKey(KeyCode.C))
+        {
+            focusTarget = null;
+        }
+
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
         float vertical = 0f;
-        if (Input.GetKey(KeyCode.E)) vertical += 1f;
-        if (Input.GetKey(KeyCode.Q)) vertical -= 1f;
+
+        if (Input.GetKey(KeyCode.Space))
+            vertical += 1f;
+
+        if (Input.GetKey(KeyCode.C))
+            vertical -= 1f;
 
         float currentSpeed = moveSpeed;
-        if (Input.GetKey(KeyCode.LeftShift)) currentSpeed *= sprintMultiplier;
 
-        Vector3 movement = transform.forward * v + transform.right * h + transform.up * vertical;
+        if (Input.GetKey(KeyCode.LeftShift))
+            currentSpeed *= sprintMultiplier;
+
+        Vector3 movement =
+            transform.forward * v +
+            transform.right * h +
+            transform.up * vertical;
+
         transform.position += movement * currentSpeed * Time.deltaTime;
+    }
+
+    // Called by PlanetBrowserUI
+  public void FocusOn(Transform target)
+{
+    if (target == null)
+        return;
+
+    focusTarget = target;
+
+    // Move camera to a nice viewing position
+    Vector3 desiredOffset = new Vector3(0, 3f, -8f);
+
+    transform.position = target.position + desiredOffset;
+    focusOffset = desiredOffset;
+
+    transform.LookAt(target);
+}
+
+    public void ClearFocus()
+    {
+        
+        focusTarget = null;
     }
 }

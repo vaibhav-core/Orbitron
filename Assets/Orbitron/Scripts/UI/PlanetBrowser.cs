@@ -93,4 +93,26 @@ public class PlanetBrowserUI : MonoBehaviour
 
         return PlanetManager.Instance.GetBodyState(selectedPlanet);
     }
+
+    public void FocusSelectedPlanet()
+    {
+        Debug.Log("Focus button pressed");
+        BodyState body = GetSelectedBody();
+        Debug.Log(body == null ? "Body is NULL" : body.name);
+
+        if (body == null)
+            return;
+
+        GameObject planet = PlanetManager.Instance.GetBody(body.name);
+        Debug.Log(planet);
+
+        if (planet == null)
+            return;
+
+        CameraController cameraController =
+            FindFirstObjectByType<CameraController>();
+
+        if (cameraController != null)
+            cameraController.FocusOn(planet.transform);
+    }
 }

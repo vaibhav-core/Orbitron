@@ -35,6 +35,31 @@ public class PlanetManager : MonoBehaviour
     // ── Called by SimulationManager every TCP tick ────────────────────────────
     public void UpdateBodies(SimulationState state)
     {
+        // ---------------- Remove bodies that no longer exist ----------------
+
+        HashSet<string> aliveBodies = new(System.StringComparer.OrdinalIgnoreCase);
+
+        foreach (BodyState body in state.bodies)
+            aliveBodies.Add(body.name);
+
+            List<string> removeList = new();
+
+            foreach (string existing in _bodies.Keys)
+            {
+                if (!aliveBodies.Contains(existing))
+                    removeList.Add(existing);
+            }
+
+            foreach (string dead in removeList)
+            {
+                Destroy(_bodies[dead]);
+
+                _bodies.Remove(dead);
+                _bodyStates.Remove(dead);
+
+                Debug.Log($"[PlanetManager] Removed '{dead}'");
+            }
+
         if (state.bodies == null) return;
 
         foreach (BodyState body in state.bodies)

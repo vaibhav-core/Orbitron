@@ -12,6 +12,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject collisionPanel;
     [SerializeField] private PlanetBrowserUI planetBrowserUI;
     [SerializeField] private PlanetInfoUI planetInfoUI;
+    [SerializeField] private GameObject removePanel;
 
     [Header("Toggle Key")]
     [SerializeField] private KeyCode browserKey = KeyCode.M;
@@ -33,6 +34,19 @@ public class UIManager : MonoBehaviour
 
         HideAllPanels();
     }
+
+
+    public void OpenRemovePanel()
+{
+    removePanel.SetActive(true);
+
+    removePanel.GetComponent<RemoveConfirmationUI>().Refresh();
+}
+
+public void CloseRemovePanel()
+{
+    removePanel.SetActive(false);
+}
 
  private void Update()
 {
