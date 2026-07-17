@@ -52,7 +52,7 @@ public class MainMenuManager : MonoBehaviour
     }
 
     // =====================================================
-    // Startup
+    // STARTUP
     // =====================================================
 
     private IEnumerator StartupSequence()
@@ -77,15 +77,11 @@ public class MainMenuManager : MonoBehaviour
 
     private void HideAllMenus()
     {
-        loadingPanel.SetActive(false);
-        mainMenuPanel.SetActive(false);
-        controlsPanel.SetActive(false);
-
-        if (loadPanel != null)
-            loadPanel.SetActive(false);
-
-        if (pausePanel != null)
-            pausePanel.SetActive(false);
+        if (loadingPanel != null) loadingPanel.SetActive(false);
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(false);
+        if (controlsPanel != null) controlsPanel.SetActive(false);
+        if (loadPanel != null) loadPanel.SetActive(false);
+        if (pausePanel != null) pausePanel.SetActive(false);
     }
 
     // =====================================================
@@ -94,8 +90,6 @@ public class MainMenuManager : MonoBehaviour
 
     public void Play()
     {
-        PythonLauncher.Instance.LaunchMain();
-
         HideAllMenus();
 
         gameStarted = true;
@@ -121,8 +115,6 @@ public class MainMenuManager : MonoBehaviour
 
     public void LoadSolarSystem()
     {
-        PythonLauncher.Instance.LaunchSolarSystem();
-
         HideAllMenus();
 
         gameStarted = true;
@@ -180,8 +172,6 @@ public class MainMenuManager : MonoBehaviour
 
     public void Exit()
     {
-        PythonLauncher.Instance.CloseBackend();
-
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else

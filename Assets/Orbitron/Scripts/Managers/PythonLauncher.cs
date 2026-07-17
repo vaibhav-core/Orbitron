@@ -66,29 +66,33 @@ public class PythonLauncher : MonoBehaviour
 
         backendProcess.StartInfo.FileName = path;
         backendProcess.StartInfo.WorkingDirectory = Path.GetDirectoryName(path);
-        backendProcess.StartInfo.UseShellExecute = true;
+        backendProcess.StartInfo.UseShellExecute = false;
+        backendProcess.StartInfo.CreateNoWindow = true;
 
         backendProcess.Start();
 
         UnityEngine.Debug.Log($"Started backend: {path}");
     }
+public void CloseBackend()
+{
+    if (backendProcess == null)
+        return;
 
-    public void CloseBackend()
+    try
     {
-        try
+        if (!backendProcess.HasExited)
         {
-            if (backendProcess != null && !backendProcess.HasExited)
-                backendProcess.Kill();
+            backendProcess.Kill();
+            backendProcess.WaitForExit(3000);
         }
-        catch
-        {
-        }
-
-        backendProcess = null;
+    }
+    catch (System.Exception e)
+    {
+        UnityEngine.Debug.LogWarning(e.Message);
     }
 
-    private void OnApplicationQuit()
-    {
-        CloseBackend();
-    }
+    backendProcess.Dispose();
+    backendProcess = null;
+}
+
 }
